@@ -201,6 +201,23 @@ class BcFileUploader
             $file = [];
             if (!empty($data[$name]) && is_array($data[$name])) {
                 $file = $data[$name];
+
+                if ($file['tmp_name']) {
+                    $data[$setting['name'] . '_base64'] = base64_encode(file_get_contents($file['tmp_name']));
+                    $data[$setting['name'] . '_base64_name'] = $file['name'];
+                } elseif (!empty($data[$setting['name'] . '_base64'])) {
+                    $tmpFilePath = TMP . '/' . uniqid();
+                    $tmpFileData = base64_decode($data[$setting['name'] . '_base64']);
+                    file_put_contents($tmpFilePath, $tmpFileData);
+                    register_shutdown_function('unlink', $tmpFilePath);
+                    $file = $data[$name] = [
+                        'tmp_name' => $tmpFilePath,
+                        'name' => $data[$name . '_base64_name'],
+                        'size' => strlen($tmpFileData),
+                        'type' => null,
+                    ];
+                }
+
                 $file['uploadable'] = $this->isUploadable($setting['type'], $file['type'], $file);
                 $file['ext'] = BcUtil::decodeContent($file['type'], @$file['name']);
                 if (isset($file['error']) && (int) $file['error'] === UPLOAD_ERR_NO_FILE) {

@@ -870,6 +870,10 @@ SCRIPT_END;
         $hiddenValue = $this->getSourceValue($fieldName . '_');
         $fileValue = $this->getSourceValue($fieldName);
 
+        if ($this->getSourceValue($fieldName . '_base64_name')) {
+            $fileLinkTag = h($this->getSourceValue($fieldName . '_base64_name'));
+        }
+
         $hiddenTag = '';
         if ($fileLinkTag) {
             if (is_array($fileValue) && empty($fileValue['tmp_name']) && $hiddenValue) {
@@ -887,6 +891,9 @@ SCRIPT_END;
         if ($fileLinkTag) {
             $out .= '&nbsp;' . $delCheckTag . $hiddenTag . '<br />' . $fileLinkTag;
         }
+
+        $out .= $this->hidden($fieldName . '_base64', ['value' => $this->getSourceValue($fieldName . '_base64')]);
+        $out .= $this->hidden($fieldName . '_base64_name', ['value' => $this->getSourceValue($fieldName . '_base64_name')]);
 
         if (isset($divOptions)) {
             if ($divOptions === false) {
